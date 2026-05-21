@@ -11,7 +11,7 @@ function cerrarSesion() {
     localStorage.removeItem('token');
     localStorage.removeItem('nombre');
     localStorage.removeItem('usuarioId');
-    window.location.href = '/src/index.html';
+    window.location.href = '/find-pets/frontend/src/index.html';
 }
 
 // ─── Actualizar navbar según estado de sesión ─────────────────────────────────

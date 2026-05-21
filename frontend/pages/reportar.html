@@ -188,7 +188,7 @@
             const method = editId ? 'PUT' : 'POST';
 
             const headers = { 'Authorization': 'Bearer ' + getToken() };
-            const res = await fetch('http://localhost:3000/api' + url, { method, headers, body: formData });
+            const res = await fetch('https://find-pets-production.up.railway.app/api' + url, { method, headers, body: formData });
             const data = await res.json();
 
             btn.disabled = false;

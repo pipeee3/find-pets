@@ -1,5 +1,5 @@
 // ─── Configuración global ────────────────────────────────────────────────────
-const API = 'http://localhost:3000/api';
+const API = 'https://find-pets-production.up.railway.app/api';
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
 function getToken()    { return localStorage.getItem('token'); }

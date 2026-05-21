@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../src/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="../src/global.css">
+    <link rel="stylesheet" href="../src/style_login.css">
+    <link rel="icon" href="../assets/images/logo-find-pets.svg">
+    <title>Find Pets - Registro</title>
+</head>
+<body>
+    <header>
+        <nav class="bg-white shadow border-gray-200 px-4 lg:px-6 py-2.5">
+            <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
+                <a href="../src/index.html" class="flex items-center">
+                    <img src="../assets/images/logo-find-pets.svg" class="mr-3 h-6 sm:h-10" alt="Find Pets logo"/>
+                    <span class="self-center text-xl font-semibold">Find Pets</span>
+                </a>
+                <div class="flex items-center gap-2">
+                    <a href="./login_page.html" class="text-gray-800 hover:bg-gray-50 font-medium rounded-lg text-sm px-4 py-2">Log in</a>
+                    <a href="./sign_up.html" class="text-white bg-blue-700 font-medium rounded-lg text-sm px-4 py-2">Sign up</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="flex flex-col md:flex-row h-screen items-center">
+        <div class="hidden lg:block w-full md:w-1/2 xl:w-2/3 h-screen">
+            <img src="../assets/images/gato-sobre-mesa-fondo-oscuro_865967-52566.avif" alt="" class="w-full h-full object-cover">
+        </div>
+
+        <div class="bg-white w-full md:max-w-md lg:max-w-full md:w-1/2 xl:w-1/3 h-screen px-6 lg:px-16 xl:px-12 flex items-center justify-center overflow-y-auto">
+            <div class="w-full py-10">
+                <h1 class="color_text text-xl md:text-2xl font-bold leading-tight">Crear cuenta</h1>
+
+                <div id="mensaje-error" class="hidden mt-4 msg-error"></div>
+                <div id="mensaje-exito" class="hidden mt-4 msg-exito"></div>
+
+                <div class="mt-6 space-y-4">
+                    <div>
+                        <label class="block text-gray-700">Nombre</label>
+                        <input type="text" id="nombre" placeholder="Ingresa tu nombre"
+                            class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700">Correo electrónico</label>
+                        <input type="email" id="email" placeholder="Ingresa tu correo"
+                            class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700">Teléfono <span class="text-gray-400 text-sm">(opcional, para contacto)</span></label>
+                        <input type="tel" id="telefono" placeholder="Ej: 311 234 5678"
+                            class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700">Contraseña</label>
+                        <input type="password" id="password" placeholder="Mínimo 6 caracteres"
+                            class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700">Confirmar contraseña</label>
+                        <input type="password" id="confirmar-password" placeholder="Repite tu contraseña"
+                            class="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none">
+                    </div>
+
+                    <button onclick="registrar()" id="btn-registro"
+                        class="w-full block bg-[#1D4ED8] hover:bg-[#1e40af] text-white font-semibold rounded-lg px-4 py-3 mt-2">
+                        Crear cuenta
+                    </button>
+                </div>
+
+                <p class="mt-6">¿Ya tienes cuenta? <a href="./login_page.html" class="text-[#1D4ED8] font-semibold">Inicia sesión</a></p>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../src/app.js"></script>
+    <script>
+        if (isLoggedIn()) window.location.href = '../src/index.html';
+
+        async function registrar() {
+            const nombre    = document.getElementById('nombre').value.trim();
+            const email     = document.getElementById('email').value.trim();
+            const telefono  = document.getElementById('telefono').value.trim();
+            const password  = document.getElementById('password').value;
+            const confirmar = document.getElementById('confirmar-password').value;
+            const errorDiv  = document.getElementById('mensaje-error');
+            const exitoDiv  = document.getElementById('mensaje-exito');
+            errorDiv.classList.add('hidden');
+            exitoDiv.classList.add('hidden');
+
+            if (!nombre || !email || !password) {
+                errorDiv.textContent = 'Nombre, email y contraseña son obligatorios.';
+                errorDiv.classList.remove('hidden'); return;
+            }
+            if (password.length < 6) {
+                errorDiv.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+                errorDiv.classList.remove('hidden'); return;
+            }
+            if (password !== confirmar) {
+                errorDiv.textContent = 'Las contraseñas no coinciden.';
+                errorDiv.classList.remove('hidden'); return;
+            }
+
+            const btn = document.getElementById('btn-registro');
+            btn.disabled = true; btn.textContent = 'Creando cuenta...';
+
+            const { ok, data } = await apiFetch('/register', {
+                method: 'POST',
+                body: JSON.stringify({ nombre, email, password, telefono: telefono || undefined })
+            });
+
+            btn.disabled = false; btn.textContent = 'Crear cuenta';
+
+            if (ok) {
+                exitoDiv.textContent = '¡Cuenta creada! Redirigiendo...';
+                exitoDiv.classList.remove('hidden');
+                setTimeout(() => window.location.href = './login_page.html', 2000);
+            } else {
+                errorDiv.textContent = data.error || 'Error al registrar';
+                errorDiv.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

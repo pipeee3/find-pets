@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../src/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="../src/global.css">
+    <link rel="icon" href="../assets/images/logo-find-pets.svg">
+    <title>Find Pets - Reportar Mascota</title>
+</head>
+<body class="bg-gray-50">
+
+    <nav class="bg-white shadow border-gray-200 px-4 lg:px-6 py-2.5">
+        <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
+            <a href="../src/index.html" class="flex items-center">
+                <img src="../assets/images/logo-find-pets.svg" class="mr-3 h-6 sm:h-10" alt="logo"/>
+                <span class="self-center text-xl font-semibold">Find Pets</span>
+            </a>
+            <div class="flex items-center gap-3">
+                <span id="saludo" class="text-gray-600 text-sm hidden"></span>
+                <a href="../src/index.html" class="text-gray-700 hover:text-blue-700 font-medium text-sm">Inicio</a>
+                <a href="./adoptar.html" class="text-gray-700 hover:text-blue-700 font-medium text-sm">Ver mascotas</a>
+                <a href="./perfil.html" id="btn-perfil" class="hidden text-sm text-gray-700 font-medium hover:text-blue-700">Mi perfil</a>
+                <button onclick="cerrarSesion()" id="btn-logout" class="hidden text-sm text-red-600 hover:underline font-medium">Cerrar sesión</button>
+                <a href="./login_page.html" id="btn-login" class="hidden"></a>
+                <a href="./sign_up.html" id="btn-signup" class="hidden"></a>
+                <a href="./reportar.html" id="btn-reportar" class="hidden"></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-2xl mx-auto mt-10 px-4 pb-16">
+        <h1 id="titulo-pagina" class="text-3xl font-bold text-gray-800 mb-2">Reportar mascota</h1>
+        <p class="text-gray-500 mb-8">Completa el formulario y ayuda a encontrarla.</p>
+
+        <div id="msg-error" class="hidden mb-4 msg-error"></div>
+        <div id="msg-exito" class="hidden mb-4 msg-exito"></div>
+
+        <div class="bg-white rounded-2xl shadow p-8 space-y-5">
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Nombre de la mascota <span class="text-gray-400 text-sm">(opcional)</span></label>
+                <input type="text" id="nombre" placeholder="Ej: Max"
+                    class="w-full px-4 py-3 rounded-lg bg-gray-100 border focus:border-blue-500 focus:bg-white focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Tipo de mascota <span class="text-red-500">*</span></label>
+                <select id="tipo" class="w-full px-4 py-3 rounded-lg bg-gray-100 border focus:border-blue-500 focus:bg-white focus:outline-none">
+                    <option value="">Selecciona...</option>
+                    <option value="perro">Perro</option>
+                    <option value="gato">Gato</option>
+                    <option value="conejo">Conejo</option>
+                    <option value="hamster">Hámster</option>
+                    <option value="otro">Otro</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Raza <span class="text-gray-400 text-sm">(opcional)</span></label>
+                <input type="text" id="raza" placeholder="Ej: Labrador"
+                    class="w-full px-4 py-3 rounded-lg bg-gray-100 border focus:border-blue-500 focus:bg-white focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Descripción <span class="text-red-500">*</span></label>
+                <textarea id="descripcion" rows="3" placeholder="Color, señas particulares, collar..."
+                    class="w-full px-4 py-3 rounded-lg bg-gray-100 border focus:border-blue-500 focus:bg-white focus:outline-none"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Última ubicación vista <span class="text-red-500">*</span></label>
+                <input type="text" id="ubicacion" placeholder="Ej: Parque Simón Bolívar, Bogotá"
+                    class="w-full px-4 py-3 rounded-lg bg-gray-100 border focus:border-blue-500 focus:bg-white focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Estado</label>
+                <select id="estado" class="w-full px-4 py-3 rounded-lg bg-gray-100 border focus:border-blue-500 focus:bg-white focus:outline-none">
+                    <option value="perdido">Perdido — busco a mi mascota</option>
+                    <option value="encontrado">Encontrado — encontré una mascota</option>
+                    <option value="adopcion">En adopción</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Información de contacto <span class="text-gray-400 text-sm">(teléfono o email)</span></label>
+                <input type="text" id="contacto" placeholder="Ej: 311 234 5678 o contacto@email.com"
+                    class="w-full px-4 py-3 rounded-lg bg-gray-100 border focus:border-blue-500 focus:bg-white focus:outline-none">
+            </div>
+
+            <div id="campo-foto">
+                <label class="block text-gray-700 font-medium mb-1">Foto de la mascota <span class="text-gray-400 text-sm">(máx. 5MB)</span></label>
+                <input type="file" id="foto" accept="image/*"
+                    class="w-full px-4 py-3 rounded-lg bg-gray-100 border focus:border-blue-500 focus:bg-white focus:outline-none">
+                <img id="foto-preview" src="" alt="" class="hidden mt-3 w-32 h-32 object-cover rounded-lg border">
+            </div>
+
+            <button onclick="reportar()" id="btn-submit"
+                class="w-full bg-[#1D4ED8] hover:bg-[#1e40af] text-white font-semibold rounded-lg px-4 py-3 mt-2 transition">
+                Publicar reporte
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../src/app.js"></script>
+    <script>
+        // Detectar si es modo edición
+        const params = new URLSearchParams(window.location.search);
+        const editId = params.get('editar');
+
+        if (editId) {
+            document.getElementById('titulo-pagina').textContent = 'Editar reporte';
+            document.getElementById('btn-submit').textContent = 'Guardar cambios';
+            cargarDatosEdicion();
+        }
+
+        // Redirigir si no está logueado
+        if (!isLoggedIn()) window.location.href = './login_page.html';
+
+        // Preview de foto
+        document.getElementById('foto').addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const preview = document.getElementById('foto-preview');
+                preview.src = ev.target.result;
+                preview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        });
+
+        async function cargarDatosEdicion() {
+            const { ok, data } = await apiFetch(`/mascotas/${editId}`);
+            if (!ok) return;
+            document.getElementById('nombre').value      = data.nombre || '';
+            document.getElementById('tipo').value        = data.tipo || '';
+            document.getElementById('raza').value        = data.raza || '';
+            document.getElementById('descripcion').value = data.descripcion || '';
+            document.getElementById('ubicacion').value   = data.ubicacion || '';
+            document.getElementById('estado').value      = data.estado || 'perdido';
+            document.getElementById('contacto').value    = data.contacto || '';
+            if (data.foto) {
+                const prev = document.getElementById('foto-preview');
+                prev.src = fotoUrl(data.foto);
+                prev.classList.remove('hidden');
+            }
+        }
+
+        async function reportar() {
+            const errorDiv = document.getElementById('msg-error');
+            const exitoDiv = document.getElementById('msg-exito');
+            errorDiv.classList.add('hidden');
+            exitoDiv.classList.add('hidden');
+
+            const nombre      = document.getElementById('nombre').value.trim();
+            const tipo        = document.getElementById('tipo').value;
+            const raza        = document.getElementById('raza').value.trim();
+            const descripcion = document.getElementById('descripcion').value.trim();
+            const ubicacion   = document.getElementById('ubicacion').value.trim();
+            const estado      = document.getElementById('estado').value;
+            const contacto    = document.getElementById('contacto').value.trim();
+            const foto        = document.getElementById('foto').files[0];
+
+            if (!tipo || !descripcion || !ubicacion) {
+                errorDiv.textContent = 'Por favor completa los campos obligatorios (tipo, descripción, ubicación).';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+
+            const formData = new FormData();
+            formData.append('nombre', nombre);
+            formData.append('tipo', tipo);
+            formData.append('raza', raza);
+            formData.append('descripcion', descripcion);
+            formData.append('ubicacion', ubicacion);
+            formData.append('estado', estado);
+            formData.append('contacto', contacto);
+            if (foto) formData.append('foto', foto);
+
+            const url    = editId ? `/mascotas/${editId}` : '/mascotas';
+            const method = editId ? 'PUT' : 'POST';
+
+            const headers = { 'Authorization': 'Bearer ' + getToken() };
+            const res = await fetch('http://localhost:3000/api' + url, { method, headers, body: formData });
+            const data = await res.json();
+
+            btn.disabled = false;
+            btn.textContent = editId ? 'Guardar cambios' : 'Publicar reporte';
+
+            if (res.ok) {
+                exitoDiv.textContent = editId ? 'Reporte actualizado. Redirigiendo...' : '¡Reporte publicado! Redirigiendo...';
+                exitoDiv.classList.remove('hidden');
+                window.location.href = './adoptar.html';
+            } else {
+                errorDiv.textContent = data.error || 'Error al publicar';
+                errorDiv.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

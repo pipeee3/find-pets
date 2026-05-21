@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../src/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="../src/global.css">
+    <link rel="icon" href="../assets/images/logo-find-pets.svg">
+    <title>Find Pets - Mascotas</title>
+    <style>
+        .filtro-btn { transition: all 0.15s; }
+        .filtro-btn.activo { background: #1D4ED8; color: white; border-color: #1D4ED8; }
+        #modal-overlay { background: rgba(0,0,0,0.5); }
+        .pet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <nav class="bg-white shadow px-4 lg:px-6 py-2.5">
+        <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
+            <a href="../src/index.html" class="flex items-center">
+                <img src="../assets/images/logo-find-pets.svg" class="mr-3 h-6 sm:h-10" alt="logo"/>
+                <span class="self-center text-xl font-semibold">Find Pets</span>
+            </a>
+            <div class="flex items-center gap-3 flex-wrap">
+                <span id="saludo" class="text-gray-600 text-sm hidden"></span>
+                <a href="./perfil.html" id="btn-perfil" class="hidden text-sm text-gray-700 font-medium hover:text-blue-700">Mi perfil</a>
+                <a href="./reportar.html" id="btn-reportar" class="hidden bg-[#1D4ED8] hover:bg-[#1e40af] text-white text-sm font-medium rounded-lg px-4 py-2">+ Reportar mascota</a>
+                <button onclick="cerrarSesion()" id="btn-logout" class="hidden text-sm text-red-600 hover:underline font-medium">Cerrar sesión</button>
+                <a href="./login_page.html" id="btn-login" class="hidden text-sm text-blue-700 font-medium">Iniciar sesión</a>
+                <a href="./sign_up.html" id="btn-signup" class="hidden text-sm text-white bg-blue-700 px-3 py-1.5 rounded-lg">Sign up</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto mt-10 px-4 pb-16">
+        <h1 class="text-3xl font-bold text-gray-800 mb-1">Mascotas reportadas</h1>
+        <p class="text-gray-500 mb-6">Perdidas, encontradas y en adopción.</p>
+
+        <!-- Buscador -->
+        <div class="flex gap-2 mb-5">
+            <input type="text" id="input-buscar" placeholder="Buscar por nombre, raza, ubicación..."
+                class="flex-1 px-4 py-2.5 rounded-lg border bg-white focus:outline-none focus:border-blue-500 text-sm">
+            <button onclick="buscar()" class="btn-primary px-5 py-2.5 text-sm">Buscar</button>
+        </div>
+
+        <!-- Filtros estado -->
+        <div class="flex gap-2 mb-3 flex-wrap">
+            <button onclick="setEstado('')"     class="filtro-btn activo px-4 py-2 rounded-full text-sm font-medium border" data-estado="">Todos</button>
+            <button onclick="setEstado('perdido')"    class="filtro-btn px-4 py-2 rounded-full text-sm font-medium border" data-estado="perdido">🔍 Perdidos</button>
+            <button onclick="setEstado('encontrado')" class="filtro-btn px-4 py-2 rounded-full text-sm font-medium border" data-estado="encontrado">✅ Encontrados</button>
+            <button onclick="setEstado('adopcion')"   class="filtro-btn px-4 py-2 rounded-full text-sm font-medium border" data-estado="adopcion">🏠 En adopción</button>
+        </div>
+
+        <!-- Filtros tipo -->
+        <div class="flex gap-2 mb-6 flex-wrap">
+            <select id="select-tipo" onchange="cargarMascotas()" class="px-3 py-2 rounded-lg border text-sm bg-white focus:outline-none focus:border-blue-500">
+                <option value="">Todos los tipos</option>
+                <option value="perro">Perro</option>
+                <option value="gato">Gato</option>
+                <option value="conejo">Conejo</option>
+                <option value="hamster">Hámster</option>
+                <option value="otro">Otro</option>
+            </select>
+            <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                <input type="checkbox" id="check-resueltos" onchange="cargarMascotas()" class="w-4 h-4">
+                Mostrar resueltos
+            </label>
+        </div>
+
+        <!-- Lista -->
+        <div id="loading" class="text-center py-20"><div class="spinner"></div></div>
+        <div id="lista" class="pet-grid hidden"></div>
+        <div id="vacio" class="hidden text-center text-gray-400 py-20">No hay mascotas en esta categoría.</div>
+
+        <!-- Paginación -->
+        <div id="paginacion" class="pagination hidden"></div>
+    </div>
+
+    <!-- Modal detalle -->
+    <div id="modal-overlay" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start p-5 border-b">
+                <h2 id="modal-nombre" class="text-2xl font-bold text-gray-800"></h2>
+                <button onclick="cerrarModal()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <img id="modal-foto" src="" alt="" class="w-full object-contain max-h-96">
+            <div class="p-5 space-y-3">
+                <div id="modal-badge"></div>
+                <p class="text-sm text-gray-500"><span class="font-medium text-gray-700">Tipo:</span> <span id="modal-tipo"></span></p>
+                <p class="text-sm text-gray-500"><span class="font-medium text-gray-700">Raza:</span> <span id="modal-raza"></span></p>
+                <p class="text-sm text-gray-500"><span class="font-medium text-gray-700">Ubicación:</span> <span id="modal-ubicacion"></span></p>
+                <p class="text-sm text-gray-500"><span class="font-medium text-gray-700">Descripción:</span> <span id="modal-descripcion"></span></p>
+                <p class="text-sm text-gray-500"><span class="font-medium text-gray-700">Publicado por:</span> <span id="modal-dueno"></span></p>
+                <p class="text-sm text-gray-500"><span class="font-medium text-gray-700">Contacto:</span> <span id="modal-contacto"></span></p>
+                <p class="text-sm text-gray-500"><span class="font-medium text-gray-700">Fecha:</span> <span id="modal-fecha"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../src/app.js"></script>
+    <script>
+        let estadoActual = '';
+        let paginaActual = 1;
+        const LIMITE = 12;
+
+        function setEstado(estado) {
+            estadoActual = estado;
+            paginaActual = 1;
+            document.querySelectorAll('.filtro-btn').forEach(b => {
+                b.classList.toggle('activo', b.dataset.estado === estado);
+            });
+            cargarMascotas();
+        }
+
+        function buscar() {
+            paginaActual = 1;
+            cargarMascotas();
+        }
+
+        document.getElementById('input-buscar').addEventListener('keydown', e => {
+            if (e.key === 'Enter') buscar();
+        });
+
+        async function cargarMascotas() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('lista').classList.add('hidden');
+            document.getElementById('vacio').classList.add('hidden');
+            document.getElementById('paginacion').classList.add('hidden');
+
+            const tipo     = document.getElementById('select-tipo').value;
+            const buscarTxt = document.getElementById('input-buscar').value.trim();
+            const mostrarResueltos = document.getElementById('check-resueltos').checked;
+
+            const params = new URLSearchParams({ pagina: paginaActual, limite: LIMITE });
+            if (estadoActual) params.set('estado', estadoActual);
+            if (tipo)         params.set('tipo', tipo);
+            if (buscarTxt)    params.set('buscar', buscarTxt);
+            if (!mostrarResueltos) params.set('resuelto', 'false');
+
+            const { ok, data } = await apiFetch('/mascotas?' + params.toString());
+
+            document.getElementById('loading').classList.add('hidden');
+
+            if (!ok || !data.mascotas?.length) {
+                document.getElementById('vacio').classList.remove('hidden');
+                return;
+            }
+
+            const lista = document.getElementById('lista');
+            lista.innerHTML = '';
+            data.mascotas.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'pet-card cursor-pointer';
+                card.onclick = () => abrirModal(m);
+                card.innerHTML = `
+                    <img src="${fotoUrl(m.foto)}" alt="${m.nombre || m.tipo}" class="w-full object-contain bg-gray-100" onerror="this.src='../assets/images/icon.png'">
+                    <div class="pet-card-body">
+                        <div>${badgeEstado(m.estado, m.resuelto)}</div>
+                        <h3 class="font-bold text-gray-800 text-lg">${m.nombre || '(Sin nombre)'}</h3>
+                        <p class="text-sm text-gray-500 capitalize">${m.tipo}${m.raza ? ' · ' + m.raza : ''}</p>
+                        <p class="text-sm text-gray-500">📍 ${m.ubicacion}</p>
+                        <p class="text-xs text-gray-400 mt-auto">${formatFecha(m.created_at)}</p>
+                    </div>
+                    <div class="pet-card-footer">
+                        <span class="text-xs text-gray-500">Por: ${m.dueno}</span>
+                        <button class="text-blue-600 text-sm font-medium hover:underline">Ver más →</button>
+                    </div>
+                `;
+                lista.appendChild(card);
+            });
+
+            lista.classList.remove('hidden');
+            renderPaginacion(data.totalPaginas);
+        }
+
+        function renderPaginacion(total) {
+            if (total <= 1) return;
+            const pag = document.getElementById('paginacion');
+            pag.innerHTML = '';
+            pag.classList.remove('hidden');
+
+            const btnPrev = document.createElement('button');
+            btnPrev.textContent = '← Anterior';
+            btnPrev.className = 'page-btn';
+            btnPrev.disabled = paginaActual === 1;
+            btnPrev.onclick = () => { paginaActual--; cargarMascotas(); window.scrollTo(0,0); };
+            pag.appendChild(btnPrev);
+
+            for (let i = 1; i <= total; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = 'page-btn' + (i === paginaActual ? ' active' : '');
+                btn.onclick = () => { paginaActual = i; cargarMascotas(); window.scrollTo(0,0); };
+                pag.appendChild(btn);
+            }
+
+            const btnNext = document.createElement('button');
+            btnNext.textContent = 'Siguiente →';
+            btnNext.className = 'page-btn';
+            btnNext.disabled = paginaActual === total;
+            btnNext.onclick = () => { paginaActual++; cargarMascotas(); window.scrollTo(0,0); };
+            pag.appendChild(btnNext);
+        }
+
+        function abrirModal(m) {
+            document.getElementById('modal-nombre').textContent   = m.nombre || '(Sin nombre)';
+            document.getElementById('modal-foto').src             = fotoUrl(m.foto);
+            document.getElementById('modal-badge').innerHTML      = badgeEstado(m.estado, m.resuelto);
+            document.getElementById('modal-tipo').textContent     = m.tipo;
+            document.getElementById('modal-raza').textContent     = m.raza || 'No especificada';
+            document.getElementById('modal-ubicacion').textContent = m.ubicacion;
+            document.getElementById('modal-descripcion').textContent = m.descripcion;
+            document.getElementById('modal-dueno').textContent    = m.dueno;
+            document.getElementById('modal-contacto').textContent = m.contacto || m.dueno_telefono || 'No especificado';
+            document.getElementById('modal-fecha').textContent    = formatFecha(m.created_at);
+            document.getElementById('modal-overlay').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('modal-overlay').addEventListener('click', e => {
+            if (e.target === document.getElementById('modal-overlay')) cerrarModal();
+        });
+
+        cargarMascotas();
+    </script>
+</body>
+</html>

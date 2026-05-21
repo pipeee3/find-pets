@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../src/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="../src/global.css">
+    <link rel="icon" href="../assets/images/logo-find-pets.svg">
+    <title>Find Pets - Mi Perfil</title>
+    <style>
+        .pet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.2rem; }
+        .tab-btn { border-bottom: 3px solid transparent; transition: all 0.15s; }
+        .tab-btn.activo { border-bottom-color: #1D4ED8; color: #1D4ED8; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <nav class="bg-white shadow px-4 lg:px-6 py-2.5">
+        <div class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
+            <a href="../src/index.html" class="flex items-center">
+                <img src="../assets/images/logo-find-pets.svg" class="mr-3 h-6 sm:h-10" alt="logo"/>
+                <span class="self-center text-xl font-semibold">Find Pets</span>
+            </a>
+            <div class="flex items-center gap-3">
+                <span id="saludo" class="text-gray-600 text-sm hidden"></span>
+                <a href="./adoptar.html" class="text-gray-700 hover:text-blue-700 font-medium text-sm">Ver mascotas</a>
+                <a href="./reportar.html" id="btn-reportar" class="hidden bg-green-600 text-white text-sm font-medium rounded-lg px-4 py-2">+ Reportar</a>
+                <button onclick="cerrarSesion()" id="btn-logout" class="hidden text-sm text-red-600 border border-red-300 rounded-lg px-4 py-2">Cerrar sesión</button>
+                <a href="./login_page.html" id="btn-login" class="hidden text-sm text-blue-700 font-medium">Iniciar sesión</a>
+                <a href="./sign_up.html" id="btn-signup" class="hidden"></a>
+                <a href="./perfil.html" id="btn-perfil" class="hidden"></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto mt-10 px-4 pb-16">
+
+        <!-- Sección perfil -->
+        <div class="bg-white rounded-2xl shadow p-6 mb-8 flex flex-col md:flex-row gap-6 items-start">
+            <div class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl font-bold text-blue-700 flex-shrink-0" id="avatar">?</div>
+            <div class="flex-1">
+                <h1 id="perfil-nombre" class="text-2xl font-bold text-gray-800">Cargando...</h1>
+                <p id="perfil-email" class="text-gray-500 text-sm mt-1"></p>
+                <p id="perfil-telefono" class="text-gray-500 text-sm"></p>
+                <p id="perfil-fecha" class="text-gray-400 text-xs mt-1"></p>
+            </div>
+            <button onclick="abrirEditar()" class="btn-primary text-sm px-4 py-2 flex-shrink-0">Editar perfil</button>
+        </div>
+
+        <!-- Modal editar perfil -->
+        <div id="modal-editar" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Editar perfil</h2>
+                    <button onclick="cerrarEditar()" class="text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+                <div id="modal-error" class="hidden mb-3 msg-error text-sm"></div>
+                <div id="modal-exito" class="hidden mb-3 msg-exito text-sm"></div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-1">Nombre</label>
+                        <input type="text" id="edit-nombre" class="w-full px-3 py-2.5 rounded-lg bg-gray-100 border focus:border-blue-500 focus:bg-white focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-1">Teléfono</label>
+                        <input type="tel" id="edit-telefono" placeholder="Opcional" class="w-full px-3 py-2.5 rounded-lg bg-gray-100 border focus:border-blue-500 focus:bg-white focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-1">Nueva contraseña <span class="text-gray-400">(dejar vacío para no cambiar)</span></label>
+                        <input type="password" id="edit-password" placeholder="Mínimo 6 caracteres" class="w-full px-3 py-2.5 rounded-lg bg-gray-100 border focus:border-blue-500 focus:bg-white focus:outline-none text-sm">
+                    </div>
+                    <button onclick="guardarPerfil()" id="btn-guardar" class="w-full btn-primary py-2.5">Guardar cambios</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-6 border-b mb-6">
+            <button class="tab-btn activo pb-3 text-sm" onclick="setTab('activos', this)">Mis reportes activos</button>
+            <button class="tab-btn pb-3 text-sm text-gray-500" onclick="setTab('resueltos', this)">Resueltos</button>
+        </div>
+
+        <div id="loading-mascotas" class="text-center py-10"><div class="spinner"></div></div>
+        <div id="lista-mascotas" class="pet-grid hidden"></div>
+        <div id="vacio-mascotas" class="hidden text-center text-gray-400 py-16">No tienes reportes aquí todavía.</div>
+    </div>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../src/app.js"></script>
+    <script>
+        if (!isLoggedIn()) window.location.href = './login_page.html';
+
+        let tabActual = 'activos';
+        let todasMascotas = [];
+
+        async function cargarPerfil() {
+            const { ok, data } = await apiFetch('/perfil');
+            if (!ok) return;
+            document.getElementById('perfil-nombre').textContent  = data.nombre;
+            document.getElementById('perfil-email').textContent   = data.email;
+            document.getElementById('perfil-telefono').textContent = data.telefono ? '📞 ' + data.telefono : '';
+            document.getElementById('perfil-fecha').textContent   = 'Miembro desde ' + formatFecha(data.created_at);
+            document.getElementById('avatar').textContent         = data.nombre.charAt(0).toUpperCase();
+            document.getElementById('edit-nombre').value   = data.nombre;
+            document.getElementById('edit-telefono').value = data.telefono || '';
+        }
+
+        async function cargarMisMascotas() {
+            document.getElementById('loading-mascotas').classList.remove('hidden');
+            document.getElementById('lista-mascotas').classList.add('hidden');
+            document.getElementById('vacio-mascotas').classList.add('hidden');
+
+            const { ok, data } = await apiFetch('/mis-mascotas');
+            document.getElementById('loading-mascotas').classList.add('hidden');
+
+            if (!ok) return;
+            todasMascotas = data;
+            renderTab();
+        }
+
+        function setTab(tab, btn) {
+            tabActual = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
+            btn.classList.add('activo');
+            renderTab();
+        }
+
+        function renderTab() {
+            const filtradas = todasMascotas.filter(m =>
+                tabActual === 'activos' ? !m.resuelto : m.resuelto
+            );
+
+            const lista = document.getElementById('lista-mascotas');
+            lista.innerHTML = '';
+
+            if (!filtradas.length) {
+                document.getElementById('vacio-mascotas').classList.remove('hidden');
+                lista.classList.add('hidden');
+                return;
+            }
+
+            document.getElementById('vacio-mascotas').classList.add('hidden');
+            lista.classList.remove('hidden');
+
+            filtradas.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'pet-card';
+                card.innerHTML = `
+                    <img src="${fotoUrl(m.foto)}" alt="${m.nombre || m.tipo}" onerror="this.src='../assets/images/icon.png'">
+                    <div class="pet-card-body">
+                        <div>${badgeEstado(m.estado, m.resuelto)}</div>
+                        <h3 class="font-bold text-gray-800">${m.nombre || '(Sin nombre)'}</h3>
+                        <p class="text-sm text-gray-500 capitalize">${m.tipo}${m.raza ? ' · ' + m.raza : ''}</p>
+                        <p class="text-sm text-gray-500">📍 ${m.ubicacion}</p>
+                        <p class="text-xs text-gray-400">${formatFecha(m.created_at)}</p>
+                    </div>
+                    <div class="pet-card-footer gap-2 flex-wrap">
+                        <a href="./reportar.html?editar=${m.id}" class="text-blue-600 text-xs font-medium hover:underline">✏️ Editar</a>
+                        ${!m.resuelto ? `<button onclick="marcarResuelto(${m.id}, this)" class="btn-success text-xs py-1 px-2">✅ Resuelto</button>` : ''}
+                        <button onclick="eliminar(${m.id}, this)" class="btn-danger text-xs py-1 px-2">🗑 Eliminar</button>
+                    </div>
+                `;
+                lista.appendChild(card);
+            });
+        }
+
+        async function marcarResuelto(id, btn) {
+            if (!confirm('¿Marcar este reporte como resuelto?')) return;
+            btn.disabled = true;
+            const { ok } = await apiFetch(`/mascotas/${id}/resuelto`, { method: 'PUT' });
+            if (ok) cargarMisMascotas();
+        }
+
+        async function eliminar(id, btn) {
+            if (!confirm('¿Eliminar este reporte? Esta acción no se puede deshacer.')) return;
+            btn.disabled = true;
+            const { ok } = await apiFetch(`/mascotas/${id}`, { method: 'DELETE' });
+            if (ok) cargarMisMascotas();
+        }
+
+        function abrirEditar() {
+            document.getElementById('modal-editar').classList.remove('hidden');
+            document.getElementById('modal-error').classList.add('hidden');
+            document.getElementById('modal-exito').classList.add('hidden');
+        }
+        function cerrarEditar() { document.getElementById('modal-editar').classList.add('hidden'); }
+
+        async function guardarPerfil() {
+            const nombre   = document.getElementById('edit-nombre').value.trim();
+            const telefono = document.getElementById('edit-telefono').value.trim();
+            const password = document.getElementById('edit-password').value;
+            const errorDiv = document.getElementById('modal-error');
+            const exitoDiv = document.getElementById('modal-exito');
+            errorDiv.classList.add('hidden');
+            exitoDiv.classList.add('hidden');
+
+            if (!nombre) { errorDiv.textContent = 'El nombre es obligatorio.'; errorDiv.classList.remove('hidden'); return; }
+
+            const btn = document.getElementById('btn-guardar');
+            btn.disabled = true; btn.textContent = 'Guardando...';
+
+            const body = { nombre, telefono: telefono || undefined };
+            if (password && password.length >= 6) body.password = password;
+
+            const { ok, data } = await apiFetch('/perfil', { method: 'PUT', body: JSON.stringify(body) });
+            btn.disabled = false; btn.textContent = 'Guardar cambios';
+
+            if (ok) {
+                exitoDiv.textContent = 'Perfil actualizado.';
+                exitoDiv.classList.remove('hidden');
+                localStorage.setItem('nombre', nombre);
+                setTimeout(() => { cerrarEditar(); cargarPerfil(); actualizarNav(); }, 1200);
+            } else {
+                errorDiv.textContent = data.error || 'Error al guardar';
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        cargarPerfil();
+        cargarMisMascotas();
+    </script>
+</body>
+</html>

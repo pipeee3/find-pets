@@ -23,20 +23,21 @@ if (!JWT_SECRET) {
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
-// ─── Multer con validación ───────────────────────────────────────────────────
-const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadsDir),
-    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+// ─── Cloudinary + Multer ─────────────────────────────────────────────────────
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET
 });
-const upload = multer({
-    storage,
-    limits: { fileSize: MAX_FILE_MB * 1024 * 1024 },
-    fileFilter: (req, file, cb) => {
-        if (ALLOWED_MIME.includes(file.mimetype)) return cb(null, true);
-        cb(new Error('Solo se permiten imágenes (jpg, png, webp, gif)'));
-    }
+
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: { folder: 'find-pets', allowed_formats: ['jpg', 'png', 'webp', 'gif'] }
 });
+const upload = multer({ storage, limits: { fileSize: MAX_FILE_MB * 1024 * 1024 } });
 
 // ─── Express ─────────────────────────────────────────────────────────────────
 const app = express();

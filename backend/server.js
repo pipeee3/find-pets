@@ -206,7 +206,7 @@ app.post('/api/mascotas', verificarToken, upload.single('foto'), (req, res) => {
     if (!tipo || !descripcion || !ubicacion)
         return res.status(400).json({ error: 'Tipo, descripción y ubicación son obligatorios' });
 
-    const foto = req.file ? req.file.filename : null;
+    const foto = req.file ? req.file.path : null;
     db.query(
         'INSERT INTO mascotas (nombre, tipo, raza, descripcion, ubicacion, estado, contacto, usuario_id, foto) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [nombre || null, tipo, raza || null, descripcion, ubicacion, estado || 'perdido', contacto || null, req.userId, foto],
@@ -308,7 +308,7 @@ app.put('/api/mascotas/:id', verificarToken, upload.single('foto'), (req, res) =
         if (err || results.length === 0) return res.status(403).json({ error: 'No autorizado' });
 
         const fotoActual = results[0].foto;
-        const fotoNueva = req.file ? req.file.filename : fotoActual;
+        const fotoNueva = req.file ? req.file.path : fotoActual;
 
         // Si hay nueva foto, borrar la anterior
         if (req.file && fotoActual) {

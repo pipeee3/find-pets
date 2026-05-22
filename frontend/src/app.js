@@ -60,9 +60,9 @@ function formatFecha(dateStr) {
 
 // ─── URL de foto ──────────────────────────────────────────────────────────────
 function fotoUrl(foto) {
-    return foto
-        ? `http://localhost:3000/uploads/${foto}`
-        : '../assets/images/icon.png';
+    if (!foto) return '../assets/images/icon.png';
+    if (foto.startsWith('http')) return foto;
+    return `https://find-pets-production.up.railway.app/uploads/${foto}`;
 }
 
 // ─── Badge de estado ──────────────────────────────────────────────────────────

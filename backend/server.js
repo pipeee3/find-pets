@@ -64,16 +64,25 @@ const generalLimiter = rateLimit({
 app.use(generalLimiter);
 
 // ─── Base de datos ────────────────────────────────────────────────────────────
-const db = mysql.createConnection({
+// Pool de conexiones: si MySQL cierra una conexión inactiva, el pool abre otra.
+// Con una sola conexión (createConnection), al caerse todas las consultas
+// (incluido el login) quedaban colgadas o fallaban para siempre.
+const db = mysql.createPool({
     host: process.env.DATABASE_HOST || 'localhost',
     user: process.env.DATABASE_USER || 'root',
     password: process.env.DATABASE_PASSWORD || '',
     database: process.env.DATABASE_NAME || 'find_pets',
-    port: process.env.DATABASE_PORT || 3306
+    port: process.env.DATABASE_PORT || 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    connectTimeout: 10000,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000
 });
 
-db.connect((err) => {
+db.getConnection((err, conn) => {
     if (err) { console.error('❌ Error conectando a MySQL:', err.message); return; }
+    conn.release();
     console.log('✅ Conectado a MySQL');
     inicializarTablas();
 });
@@ -156,13 +165,22 @@ app.post('/api/login', authLimiter, (req, res) => {
         return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
 
     db.query('SELECT * FROM usuarios WHERE email = ?', [email.trim().toLowerCase()], async (err, results) => {
-        if (err || results.length === 0)
+        if (err) {
+            console.error('❌ Error en login (DB):', err.message);
+            return res.status(500).json({ error: 'Error del servidor. Intenta de nuevo.' });
+        }
+        if (results.length === 0)
             return res.status(400).json({ error: 'Credenciales incorrectas' });
-        const user = results[0];
-        const valid = await bcrypt.compare(password, user.password);
-        if (!valid) return res.status(400).json({ error: 'Credenciales incorrectas' });
-        const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '24h' });
-        res.json({ token, nombre: user.nombre, id: user.id });
+        try {
+            const user = results[0];
+            const valid = await bcrypt.compare(password, user.password);
+            if (!valid) return res.status(400).json({ error: 'Credenciales incorrectas' });
+            const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '24h' });
+            res.json({ token, nombre: user.nombre, id: user.id });
+        } catch (e) {
+            console.error('❌ Error en login:', e.message);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
     });
 });
 

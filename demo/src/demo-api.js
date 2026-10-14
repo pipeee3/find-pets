@@ -308,17 +308,4 @@
         memDb = null;
         location.reload();
     };
-
-    // ── Etiqueta discreta de "modo demo" ─────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', function () {
-        const tag = document.createElement('div');
-        tag.textContent = '🧪 Versión demo';
-        tag.title = 'Los datos se guardan solo en este navegador. Clic para reiniciar los datos de ejemplo.';
-        tag.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:9999;background:#1D4ED8;color:#fff;' +
-            'font:600 12px system-ui,sans-serif;padding:6px 10px;border-radius:999px;opacity:.85;cursor:pointer';
-        tag.onclick = function () {
-            if (confirm('¿Reiniciar los datos de la demo? Se borrarán las cuentas y reportes que creaste.')) window.resetDemo();
-        };
-        document.body.appendChild(tag);
-    });
 })();

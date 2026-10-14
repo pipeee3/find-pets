@@ -10,7 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 (function () {
     const API_BASE = 'https://find-pets-production.up.railway.app/api';
-    const KEY = 'findpets_demo_db_v2';
+    const KEY = 'findpets_demo_db_v3';
     const realFetch = window.fetch.bind(window);
 
     // ── "Hash" simple (solo demo, NO es seguro) ──────────────────────────────
@@ -30,12 +30,18 @@
     function seed() {
         return {
             nextUserId: 2,
-            nextPetId: 1,
+            nextPetId: 2,
             usuarios: [
                 { id: 1, nombre: 'Usuario Demo', email: 'demo@findpets.com', password: hash('demo123'),
                   telefono: '311 234 5678', created_at: hace(30) }
             ],
-            mascotas: []
+            mascotas: [
+                { id: 1, nombre: 'Firulais', tipo: 'perro', raza: null,
+                  descripcion: 'Se perdió y responde a su nombre. Es muy amistoso. Si lo ves, por favor escríbeme.',
+                  ubicacion: 'Bogotá', estado: 'perdido', resuelto: 0, contacto: '311 234 5678',
+                  foto: '../assets/images/aislado-feliz-sonriente-perro-fondo-blanco-retrato-1_1562-690.avif',
+                  usuario_id: 1, created_at: hace(0) }
+            ]
         };
     }
 

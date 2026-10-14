@@ -24,8 +24,7 @@ También puedes crear tu propia cuenta en "Crear cuenta".
   datos de ejemplo.
 - Para presentar: crea tus cuentas y reportes **en el mismo navegador** que vas
   a usar el jueves.
-- Para reiniciar los datos: clic en la etiqueta azul "🧪 Versión demo" (abajo a
-  la izquierda), o ejecuta `resetDemo()` en la consola del navegador.
+- Para reiniciar los datos: ejecuta `resetDemo()` en la consola del navegador.
 - Las fotos se comprimen para caber en el navegador (límite total ~5 MB).
 - Las contraseñas **no están protegidas de forma real**: esto es solo una demo,
   no usarla en producción.

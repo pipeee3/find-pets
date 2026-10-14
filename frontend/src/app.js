@@ -47,9 +47,23 @@ async function apiFetch(url, options = {}) {
     if (getToken()) headers['Authorization'] = 'Bearer ' + getToken();
     if (!(options.body instanceof FormData)) headers['Content-Type'] = 'application/json';
 
-    const res = await fetch(API + url, { ...options, headers });
-    const data = await res.json().catch(() => ({}));
-    return { ok: res.ok, status: res.status, data };
+    // Timeout para que la página nunca se quede cargando para siempre
+    // (el servidor en Railway puede tardar en "despertar").
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+
+    try {
+        const res = await fetch(API + url, { ...options, headers, signal: controller.signal });
+        const data = await res.json().catch(() => ({}));
+        return { ok: res.ok, status: res.status, data };
+    } catch (err) {
+        const mensaje = err.name === 'AbortError'
+            ? 'El servidor tardó demasiado en responder. Intenta de nuevo en unos segundos.'
+            : 'No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.';
+        return { ok: false, status: 0, data: { error: mensaje } };
+    } finally {
+        clearTimeout(timer);
+    }
 }
 
 // ─── Formato de fecha ─────────────────────────────────────────────────────────

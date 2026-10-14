@@ -30,38 +30,12 @@
     function seed() {
         return {
             nextUserId: 2,
-            nextPetId: 6,
+            nextPetId: 1,
             usuarios: [
                 { id: 1, nombre: 'Usuario Demo', email: 'demo@findpets.com', password: hash('demo123'),
                   telefono: '311 234 5678', created_at: hace(30) }
             ],
-            mascotas: [
-                { id: 1, nombre: 'Max', tipo: 'perro', raza: 'Golden Retriever',
-                  descripcion: 'Se perdió cerca del parque. Es muy amistoso, tiene collar rojo.',
-                  ubicacion: 'Chapinero, Bogotá', estado: 'perdido', resuelto: 0, contacto: '311 234 5678',
-                  foto: '../assets/images/pngtree-golden-retriever-dog-happy-picture-image_2664316.jpg',
-                  usuario_id: 1, created_at: hace(1) },
-                { id: 2, nombre: 'Luna', tipo: 'gato', raza: 'Mestizo',
-                  descripcion: 'Gatita juguetona y cariñosa, vacunada y esterilizada. Busca un hogar.',
-                  ubicacion: 'Usaquén, Bogotá', estado: 'adopcion', resuelto: 0, contacto: '311 234 5678',
-                  foto: '../assets/images/socializar_gatito-830x466.jpg',
-                  usuario_id: 1, created_at: hace(2) },
-                { id: 3, nombre: '(Sin nombre)', tipo: 'perro', raza: 'Golden Retriever',
-                  descripcion: 'Lo encontré jugando en el parque, sin collar. Está bien cuidado.',
-                  ubicacion: 'Suba, Bogotá', estado: 'encontrado', resuelto: 0, contacto: '311 234 5678',
-                  foto: '../assets/images/feliz-golden-retriever-jugando-al-aire-libre-otono_191555-5149.avif',
-                  usuario_id: 1, created_at: hace(3) },
-                { id: 4, nombre: 'Michi', tipo: 'gato', raza: 'Doméstico',
-                  descripcion: 'Gato negro de ojos verdes. Se escapó por la ventana.',
-                  ubicacion: 'Kennedy, Bogotá', estado: 'perdido', resuelto: 0, contacto: '311 234 5678',
-                  foto: '../assets/images/gato-sobre-mesa-fondo-oscuro_865967-52566.avif',
-                  usuario_id: 1, created_at: hace(4) },
-                { id: 5, nombre: 'Toby', tipo: 'perro', raza: 'Criollo',
-                  descripcion: 'Perrito sonriente y tranquilo. Se da en adopción responsable.',
-                  ubicacion: 'Teusaquillo, Bogotá', estado: 'adopcion', resuelto: 0, contacto: '311 234 5678',
-                  foto: '../assets/images/aislado-feliz-sonriente-perro-fondo-blanco-retrato-1_1562-690.avif',
-                  usuario_id: 1, created_at: hace(5) }
-            ]
+            mascotas: []
         };
     }
 

@@ -10,7 +10,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 (function () {
     const API_BASE = 'https://find-pets-production.up.railway.app/api';
-    const KEY = 'findpets_demo_db_v1';
+    const KEY = 'findpets_demo_db_v2';
     const realFetch = window.fetch.bind(window);
 
     // ── "Hash" simple (solo demo, NO es seguro) ──────────────────────────────

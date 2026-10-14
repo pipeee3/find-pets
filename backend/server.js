@@ -142,14 +142,26 @@ app.post('/api/register', authLimiter, async (req, res) => {
         return res.status(400).json({ error: 'Nombre, email y contraseña son obligatorios' });
     if (password.length < 6)
         return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+        return res.status(400).json({ error: 'El correo electrónico no es válido' });
+    if (nombre.trim().length > 100)
+        return res.status(400).json({ error: 'El nombre no puede superar 100 caracteres' });
+    if (telefono && String(telefono).trim().length > 20)
+        return res.status(400).json({ error: 'El teléfono no puede superar 20 caracteres' });
 
     try {
         const hashedPassword = await bcrypt.hash(password, 12);
         db.query(
             'INSERT INTO usuarios (nombre, email, password, telefono) VALUES (?, ?, ?, ?)',
-            [nombre.trim(), email.trim().toLowerCase(), hashedPassword, telefono || null],
+            [nombre.trim(), email.trim().toLowerCase(), hashedPassword, telefono ? String(telefono).trim() : null],
             (err) => {
-                if (err) return res.status(400).json({ error: 'El email ya está registrado' });
+                if (err) {
+                    // Solo es "email repetido" si MySQL lo dice; cualquier otro error es del servidor
+                    if (err.code === 'ER_DUP_ENTRY')
+                        return res.status(400).json({ error: 'El email ya está registrado' });
+                    console.error('❌ Error en registro (DB):', err.code, err.message);
+                    return res.status(500).json({ error: 'Error del servidor. Intenta de nuevo.' });
+                }
                 res.json({ message: 'Usuario registrado correctamente' });
             }
         );

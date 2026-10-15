@@ -45,14 +45,55 @@
         };
     }
 
+    // Reportes extra de ejemplo. Se SUMAN a los datos ya guardados en el navegador
+    // (sin borrar nada) y cada uno se agrega una sola vez; si luego lo borras, no vuelve.
+    function extras() {
+        return [
+            { id: 101, nombre: 'Luna', tipo: 'gato', raza: 'Mestizo',
+              descripcion: 'Gatita juguetona y cariñosa, vacunada y esterilizada. Busca un hogar con mucho amor.',
+              ubicacion: 'Usaquén, Bogotá', estado: 'adopcion', resuelto: 0, contacto: '311 234 5678',
+              foto: '../assets/images/socializar_gatito-830x466.jpg', usuario_id: 1, created_at: hace(1) },
+            { id: 102, nombre: null, tipo: 'perro', raza: 'Golden Retriever',
+              descripcion: 'Lo encontré jugando en el parque, sin collar. Está sano y bien cuidado. Busco a su dueño.',
+              ubicacion: 'Suba, Bogotá', estado: 'encontrado', resuelto: 0, contacto: '311 234 5678',
+              foto: '../assets/images/feliz-golden-retriever-jugando-al-aire-libre-otono_191555-5149.avif',
+              usuario_id: 1, created_at: hace(2) },
+            { id: 103, nombre: 'Michi', tipo: 'gato', raza: 'Doméstico',
+              descripcion: 'Gato negro de ojos verdes que se escapó por la ventana. Es muy tímido, no lo persigan.',
+              ubicacion: 'Kennedy, Bogotá', estado: 'perdido', resuelto: 0, contacto: '311 234 5678',
+              foto: '../assets/images/gato-sobre-mesa-fondo-oscuro_865967-52566.avif',
+              usuario_id: 1, created_at: hace(3) },
+            { id: 104, nombre: 'Rocky', tipo: 'perro', raza: 'Golden Retriever',
+              descripcion: 'Perro joven, sociable y juguetón. Se da en adopción responsable, con seguimiento.',
+              ubicacion: 'Teusaquillo, Bogotá', estado: 'adopcion', resuelto: 0, contacto: '311 234 5678',
+              foto: '../assets/images/pngtree-golden-retriever-dog-happy-picture-image_2664316.jpg',
+              usuario_id: 1, created_at: hace(4) }
+        ];
+    }
+
+    function agregarExtras() {
+        const db = memDb;
+        if (!Array.isArray(db.extrasAgregados)) db.extrasAgregados = [];
+        let cambio = false;
+        extras().forEach(function (m) {
+            if (db.extrasAgregados.indexOf(m.id) === -1) {
+                db.extrasAgregados.push(m.id);
+                db.mascotas.push(m);
+                cambio = true;
+            }
+        });
+        if (cambio) save();
+    }
+
     function load() {
         if (memDb) return memDb;
         try {
             const raw = localStorage.getItem(KEY);
-            if (raw) { memDb = JSON.parse(raw); return memDb; }
+            if (raw) { memDb = JSON.parse(raw); agregarExtras(); return memDb; }
         } catch (e) { /* sin localStorage: se usa memoria */ }
         memDb = seed();
         save();
+        agregarExtras();
         return memDb;
     }
 
